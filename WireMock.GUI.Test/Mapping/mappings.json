@@ -1,0 +1,16 @@
+[
+  {
+    "Path": "a/path",
+    "RequestHttpMethod": 1,
+    "ResponseStatusCode": 204,
+    "ResponseBody": null,
+    "ResponseCacheControlMaxAge": null
+  },
+  {
+    "Path": null,
+    "RequestHttpMethod": 2,
+    "ResponseStatusCode": 500,
+    "ResponseBody": "A response body",
+    "ResponseCacheControlMaxAge": "60"
+  }
+]
