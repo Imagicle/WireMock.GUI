@@ -165,6 +165,8 @@
     <Compile Include="Mock\WireMockTest.cs" />
     <Compile Include="Mock\WireMockWrapperTest.cs" />
     <Compile Include="Mock\MockTestBase.cs" />
+    <Compile Include="Model\EditResponseViewModelTest.cs" />
+    <Compile Include="Model\HeaderViewModelTest.cs" />
     <Compile Include="Model\MainWindowViewModelTest.cs" />
     <Compile Include="Model\MappingInfoViewModelTest.cs" />
     <Compile Include="TestUtils\CommonTestUtils.cs" />

@@ -290,20 +290,23 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Mapping\PersistableMappingInfo.cs" />
+    <Compile Include="Mock\NewRequest.cs" />
     <Compile Include="Mock\NewRequestEventArgs.cs" />
+    <Compile Include="Model\EditResponseViewModel.cs" />
+    <Compile Include="Model\HeaderViewModel.cs" />
     <Compile Include="Utility\JsonUtilities.cs" />
     <Compile Include="Wait.cs" />
-    <Compile Include="Window\ITextAreaWindow.cs" />
+    <Compile Include="Window\IEditResponseWindow.cs" />
     <Compile Include="Window\IWindowWrapper.cs" />
     <Compile Include="Mapping\MappingsProvider.cs" />
     <Compile Include="Mock\IMockServer.cs" />
     <Compile Include="Mock\WireMockWrapper.cs" />
     <Compile Include="Mapping\IMappingsProvider.cs" />
-    <Compile Include="Window\TextAreaWindow.xaml.cs">
-      <DependentUpon>TextAreaWindow.xaml</DependentUpon>
+    <Compile Include="Window\EditResponseWindow.xaml.cs">
+      <DependentUpon>EditResponseWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Window\ITextAreaWindowFactory.cs" />
-    <Compile Include="Window\TextAreaWindowFactory.cs" />
+    <Compile Include="Window\IEditResponseWindowFactory.cs" />
+    <Compile Include="Window\EditResponseWindowFactory.cs" />
     <Compile Include="WPF\RelayCommand.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -317,7 +320,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Window\TextAreaWindow.xaml">
+    <Page Include="Window\EditResponseWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

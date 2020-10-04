@@ -87,26 +87,32 @@ namespace WireMock.GUI.Test.Mock
             id.Should().NotBe(anotherId);
         }
 
-        [TestCase("30")]
-        [TestCase("1000")]
-        [TestCase("anInvalidMaxAge")]
-        public void IfResponseCacheControlMaxAgeIsNotNull_ShouldReturnTheExpectedCacheControlHeader(string responseCacheControlMaxAge)
+        [TestCase("Cache-Control", "max-age=30")]
+        [TestCase("Cache-Control", null)]
+        [TestCase("Content-Type", "application/json")]
+        public void IfAHeaderIsConfigured_ShouldReturnTheConfiguredResponseHeader(string header, string value)
         {
-            var mapping = GivenAMapping(new MappingForTest { ResponseCacheControlMaxAge = responseCacheControlMaxAge });
+            var mappingForTest = new MappingForTest();
+            mappingForTest.Headers.Add(header, value);
+            var mapping = GivenAMapping(mappingForTest);
 
             var response = MakeHttpRequest(mapping.Path, mapping.RequestHttpMethod);
 
-            response.Headers["Cache-Control"].Should().Be($"max-age={responseCacheControlMaxAge}");
+            response.Headers[header].Should().Be(value);
         }
 
         [Test]
-        public void IfResponseCacheControlMaxAgeIsNull_ShouldReturnNullCacheControlHeader()
+        public void IfMultipleHeadersAreConfigure_ShouldReturnTheConfiguredResponseHeaders()
         {
-            var mapping = GivenAMapping(new MappingForTest { ResponseCacheControlMaxAge = null });
+            var mappingForTest = new MappingForTest();
+            mappingForTest.Headers.Add("Cache-Control", "max-age=30");
+            mappingForTest.Headers.Add("Content-Type", "application/json");
+            var mapping = GivenAMapping(mappingForTest);
 
             var response = MakeHttpRequest(mapping.Path, mapping.RequestHttpMethod);
 
-            response.Headers["Cache-Control"].Should().BeNull();
+            response.Headers["Cache-Control"].Should().Be("max-age=30");
+            response.Headers["Content-Type"].Should().Be("application/json");
         }
 
         [Test]
@@ -131,13 +137,13 @@ namespace WireMock.GUI.Test.Mock
 
         private MappingInfoViewModel GivenAMappingWith(HttpMethod requestHttpMethod, MappingForTest mapping)
         {
-            var mappingInfoViewModel = new MappingInfoViewModel(A.Fake<ITextAreaWindowFactory>())
+            var mappingInfoViewModel = new MappingInfoViewModel(A.Fake<IEditResponseWindowFactory>())
             {
                 Path = mapping.Path,
                 RequestHttpMethod = requestHttpMethod,
                 ResponseStatusCode = mapping.ResponseStatusCode,
                 ResponseBody = mapping.ResponseBody,
-                ResponseCacheControlMaxAge = mapping.ResponseCacheControlMaxAge
+                ResponseHeaders = mapping.Headers
             };
 
             MockServer.UpdateMappings(new List<MappingInfoViewModel>
@@ -220,13 +226,13 @@ namespace WireMock.GUI.Test.Mock
                 Path = FakerWrapper.Faker.Lorem.Word();
                 ResponseStatusCode = HttpStatusCode.OK;
                 ResponseBody = FakerWrapper.Faker.Lorem.Sentence();
-                ResponseCacheControlMaxAge = null;
+                Headers = new Dictionary<string, string>();
             }
 
             public string Path { get; set; }
             public HttpStatusCode ResponseStatusCode { get; set; }
             public string ResponseBody { get; set; }
-            public string ResponseCacheControlMaxAge { get; set; }
+            public IDictionary<string, string> Headers { get; }
         }
 
         #endregion

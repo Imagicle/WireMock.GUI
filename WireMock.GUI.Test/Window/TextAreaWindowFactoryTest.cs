@@ -10,7 +10,7 @@ namespace WireMock.GUI.Test.Window
     {
         #region Fixture
         
-        private ITextAreaWindowFactory _textAreaWindowFactory;
+        private IEditResponseWindowFactory _textAreaWindowFactory;
 
         #endregion
 
@@ -31,7 +31,7 @@ namespace WireMock.GUI.Test.Window
             {
                 var textAreaWindow = _textAreaWindowFactory.Create();
 
-                textAreaWindow.Should().BeOfType<TextAreaWindow>();
+                textAreaWindow.Should().BeOfType<EditResponseWindow>();
             });
         }
 

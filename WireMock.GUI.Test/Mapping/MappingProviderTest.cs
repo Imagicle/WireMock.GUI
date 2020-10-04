@@ -104,14 +104,18 @@ namespace WireMock.GUI.Test.Mapping
                     RequestHttpMethod = HttpMethod.Delete,
                     ResponseStatusCode = HttpStatusCode.InternalServerError,
                     ResponseBody = "A response body",
-                    ResponseCacheControlMaxAge = "60"
+                    Headers = new Dictionary<string, string>
+                    {
+                        { "Content-Type", "application/json"},
+                        { "Cache-Control", "max-age=60"}
+                    }
                 }
             };
         }
 
         private static string ExpectedMappingsFileContent()
         {
-            return "[{\"Path\":\"a/path\",\"RequestHttpMethod\":1,\"ResponseStatusCode\":204,\"ResponseBody\":null,\"ResponseCacheControlMaxAge\":null},{\"Path\":null,\"RequestHttpMethod\":2,\"ResponseStatusCode\":500,\"ResponseBody\":\"A response body\",\"ResponseCacheControlMaxAge\":\"60\"}]";
+            return "[{\"Path\":\"a/path\",\"RequestHttpMethod\":1,\"ResponseStatusCode\":204,\"ResponseBody\":null,\"Headers\":null},{\"Path\":null,\"RequestHttpMethod\":2,\"ResponseStatusCode\":500,\"ResponseBody\":\"A response body\",\"Headers\":{\"Content-Type\":\"application/json\",\"Cache-Control\":\"max-age=60\"}}]";
         }
 
         #endregion

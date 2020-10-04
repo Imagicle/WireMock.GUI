@@ -4,13 +4,16 @@
     "RequestHttpMethod": 1,
     "ResponseStatusCode": 204,
     "ResponseBody": null,
-    "ResponseCacheControlMaxAge": null
+    "Headers": null
   },
   {
     "Path": null,
     "RequestHttpMethod": 2,
     "ResponseStatusCode": 500,
     "ResponseBody": "A response body",
-    "ResponseCacheControlMaxAge": "60"
+    "Headers": {
+      "Content-Type": "application/json",
+      "Cache-Control": "max-age=60"
+    }
   }
 ]

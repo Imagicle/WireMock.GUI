@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 
 namespace WireMock.GUI.Mapping
@@ -9,6 +10,6 @@ namespace WireMock.GUI.Mapping
         public HttpMethod RequestHttpMethod { get; set; }
         public HttpStatusCode ResponseStatusCode { get; set; }
         public string ResponseBody { get; set; }
-        public string ResponseCacheControlMaxAge { get; set; }
+        public IDictionary<string, string> Headers { get; set; }
     }
 }

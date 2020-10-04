@@ -194,7 +194,7 @@ namespace WireMock.GUI.Test.Model
                 RequestHttpMethod = mapping.RequestHttpMethod,
                 ResponseStatusCode = mapping.ResponseStatusCode,
                 ResponseBody = mapping.ResponseBody,
-                ResponseCacheControlMaxAge = mapping.ResponseCacheControlMaxAge
+                Headers = mapping.ResponseHeaders
             };
         }
 
@@ -218,7 +218,7 @@ namespace WireMock.GUI.Test.Model
             mappingInfo.Path.Should().BeNull();
             mappingInfo.RequestHttpMethod.Should().Be(HttpMethod.Get);
             mappingInfo.ResponseStatusCode.Should().Be(HttpStatusCode.OK);
-            mappingInfo.ResponseCacheControlMaxAge.Should().Be(null);
+            mappingInfo.ResponseHeaders.Should().BeEmpty();
         }
 
         private static IEnumerable<PersistableMappingInfo> ShouldMatchInfoMappingsViewModel(IReadOnlyCollection<MappingInfoViewModel> mappingInfoViewModels)

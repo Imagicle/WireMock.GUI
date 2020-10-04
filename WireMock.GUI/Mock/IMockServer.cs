@@ -5,8 +5,7 @@ namespace WireMock.GUI.Mock
 {
     public interface IMockServer
     {
-        public delegate void NewRequest(NewRequestEventArgs e);
-        public event NewRequest OnNewRequest;
+        event NewRequest OnNewRequest;
 
         void UpdateMappings(IEnumerable<MappingInfoViewModel> mappingInfos);
 

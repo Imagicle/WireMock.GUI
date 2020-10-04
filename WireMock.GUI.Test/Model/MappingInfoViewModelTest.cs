@@ -17,7 +17,7 @@ namespace WireMock.GUI.Test.Model
     {
         #region Fixture
 
-        private ITextAreaWindowFactory _textAreaWindowFactory;
+        private IEditResponseWindowFactory _editResponseWindowFactory;
         private MappingInfoViewModel _mappingInfoViewModel;
 
         #endregion
@@ -27,8 +27,8 @@ namespace WireMock.GUI.Test.Model
         [SetUp]
         public void SetUp()
         {
-            _textAreaWindowFactory = A.Fake<ITextAreaWindowFactory>();
-            _mappingInfoViewModel = new MappingInfoViewModel(_textAreaWindowFactory);
+            _editResponseWindowFactory = A.Fake<IEditResponseWindowFactory>();
+            _mappingInfoViewModel = new MappingInfoViewModel(_editResponseWindowFactory);
         }
 
         #endregion
@@ -111,7 +111,7 @@ namespace WireMock.GUI.Test.Model
         {
             var expectedResponseStatusCode = Faker.PickRandom<HttpStatusCode>();
             using var monitor = _mappingInfoViewModel.Monitor();
-            
+
             _mappingInfoViewModel.ResponseStatusCode = expectedResponseStatusCode;
 
             monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.ResponseStatusCode);
@@ -150,7 +150,7 @@ namespace WireMock.GUI.Test.Model
         {
             var expectedResponseBody = Faker.Lorem.Sentence();
             using var monitor = _mappingInfoViewModel.Monitor();
-            
+
             _mappingInfoViewModel.ResponseBody = expectedResponseBody;
 
             monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.MinifiedResponseBody);
@@ -186,66 +186,102 @@ namespace WireMock.GUI.Test.Model
 
         #endregion
 
-        #region ResponseCacheControlMaxAge
+        #region Headers
 
         [Test]
-        public void WhenResponseCacheControlMaxAgeIsModified_ResponseCacheControlMaxAge_ShouldRaiseAnEvent()
+        public void Headers_ShouldByDefaultAnEmptyList()
         {
-            var expectedResponseCacheControlMaxAge = Faker.Random.Number().ToString();
-            using var monitor = _mappingInfoViewModel.Monitor();
-            
-            _mappingInfoViewModel.ResponseCacheControlMaxAge = expectedResponseCacheControlMaxAge;
-
-            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.ResponseCacheControlMaxAge);
+            _mappingInfoViewModel.ResponseHeaders.Should().BeEmpty();
         }
 
         [Test]
-        public void ResponseCacheControlMaxAge_ShouldBeEditable()
+        public void Headers_ShouldBeEditable()
         {
-            var expectedResponseCacheControlMaxAge = Faker.Random.Number().ToString();
+            var expectedResponseCacheControlMaxAge = new Dictionary<string, string>
+            {
+                {Faker.Lorem.Word(), Faker.Lorem.Word()},
+                {Faker.Lorem.Word(), Faker.Lorem.Word()}
+            };
 
-            _mappingInfoViewModel.ResponseCacheControlMaxAge = expectedResponseCacheControlMaxAge;
+            _mappingInfoViewModel.ResponseHeaders = expectedResponseCacheControlMaxAge;
 
-            _mappingInfoViewModel.ResponseCacheControlMaxAge.Should().Be(expectedResponseCacheControlMaxAge);
+            _mappingInfoViewModel.ResponseHeaders.Should().BeEquivalentTo(expectedResponseCacheControlMaxAge);
         }
 
         #endregion
 
-        #region EditBodyCommand
+        #region EditResponseCommand
 
         [Test]
-        public void WhenTextAreaWindowIsOpened_EditBodyCommand_ShouldOpenItWithTheActualResponseBodyValue()
+        public void WhenEditResponseWindowIsOpened_EditResponseCommand_ShouldOpenItWithTheActualResponseBodyValue()
         {
             var expectedResponseBody = Faker.Lorem.Sentence();
             _mappingInfoViewModel.ResponseBody = expectedResponseBody;
-            var textAreaWindow = GivenATextAreaWindow(true, expectedResponseBody);
+            var editResponseWindow = GivenAEditResponseWindow(true, expectedResponseBody);
 
-            ExecuteEditBodyCommand();
+            ExecuteEditResponseCommand();
 
-            A.CallToSet(() => textAreaWindow.InputValue).WhenArgumentsMatch(args => args.Get<string>(0) == expectedResponseBody).MustHaveHappenedOnceExactly();
+            A.CallToSet(() => editResponseWindow.Body).WhenArgumentsMatch(args => args.Get<string>(0) == expectedResponseBody).MustHaveHappenedOnceExactly();
         }
 
         [Test]
-        public void WhenTextAreaWindowIsClosedWithOkButton_EditBodyCommand_ShouldModifyResponseBodyWithTheValueInsertedInTheTextAreaWindow()
+        public void WhenEditResponseWindowIsClosedWithOkButton_EditResponseCommand_ShouldModifyResponseBodyWithTheValueInsertedInTheEditResponseWindow()
         {
             var expectedResponseBody = Faker.Lorem.Sentence();
-            GivenATextAreaWindow(true, expectedResponseBody);
+            GivenAEditResponseWindow(true, expectedResponseBody);
 
-            ExecuteEditBodyCommand();
+            ExecuteEditResponseCommand();
 
             _mappingInfoViewModel.ResponseBody.Should().Be(expectedResponseBody);
         }
 
         [Test]
-        public void WhenTextAreaWindowIsClosedWithExitButton_EditBodyCommand_ShouldNotModifyTheResponseBody()
+        public void WhenEditResponseWindowIsClosedWithExitButton_EditResponseCommand_ShouldNotModifyTheResponseBody()
         {
             var expectedResponseBody = Faker.Lorem.Sentence();
             _mappingInfoViewModel.ResponseBody = expectedResponseBody;
-            GivenATextAreaWindow(false, Faker.Lorem.Sentence());
+            GivenAEditResponseWindow(false, Faker.Lorem.Sentence());
 
-            ExecuteEditBodyCommand();
+            ExecuteEditResponseCommand();
 
             _mappingInfoViewModel.ResponseBody.Should().Be(expectedResponseBody);
+        }
+
+        [Test]
+        public void WhenEditResponseWindowIsOpened_EditResponseCommand_ShouldOpenItWithTheActualResponseHeadersValue()
+        {
+            var expectedResponseHeaders = GivenSomeHeaders();
+            _mappingInfoViewModel.ResponseHeaders = expectedResponseHeaders;
+            var editResponseWindow = GivenAEditResponseWindow(true, expectedResponseHeaders);
+
+            ExecuteEditResponseCommand();
+
+            A.CallToSet(() => editResponseWindow.Headers)
+                .WhenArgumentsMatch(args => args.Get<IDictionary<string, string>>(0) == expectedResponseHeaders)
+                .MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void WhenEditResponseWindowIsClosedWithOkButton_EditResponseCommand_ShouldModifyResponseHeadersWithTheValueInsertedInTheEditResponseWindow()
+        {
+            var expectedResponseHeaders = GivenSomeHeaders();
+            GivenAEditResponseWindow(true, expectedResponseHeaders);
+
+            ExecuteEditResponseCommand();
+
+            _mappingInfoViewModel.ResponseHeaders.Should().BeSameAs(expectedResponseHeaders);
+        }
+
+        [Test]
+        public void WhenEditResponseWindowIsClosedWithExitButton_EditResponseCommand_ShouldNotModifyTheResponseHeaders()
+        {
+            var expectedResponseHeaders = GivenSomeHeaders();
+            _mappingInfoViewModel.ResponseHeaders = expectedResponseHeaders;
+            GivenAEditResponseWindow(false, GivenSomeHeaders());
+
+            ExecuteEditResponseCommand();
+
+            _mappingInfoViewModel.ResponseHeaders.Should().BeSameAs(expectedResponseHeaders);
         }
 
         #endregion
@@ -262,7 +298,7 @@ namespace WireMock.GUI.Test.Model
         public void DeleteMappingCommand_ShouldThrowOnDeleteEvent()
         {
             using var monitor = _mappingInfoViewModel.Monitor();
-            
+
             ExecuteDeleteMappingCommand();
 
             monitor.Should().Raise(nameof(_mappingInfoViewModel.OnDeleteMapping));
@@ -272,19 +308,39 @@ namespace WireMock.GUI.Test.Model
 
         #region Utility Methods
 
-        private ITextAreaWindow GivenATextAreaWindow(bool showDialogResult, string expectedResponseBody)
+        private IEditResponseWindow GivenAEditResponseWindow(bool showDialogResult, string expectedResponseBody)
         {
-            var textAreaWindow = A.Fake<ITextAreaWindow>();
-            A.CallTo(() => textAreaWindow.ShowDialog()).Returns(showDialogResult);
-            A.CallTo(() => textAreaWindow.InputValue).Returns(expectedResponseBody);
-            A.CallTo(() => _textAreaWindowFactory.Create()).Returns(textAreaWindow);
+            var editResponseWindow = A.Fake<IEditResponseWindow>();
+            A.CallTo(() => editResponseWindow.ShowDialog()).Returns(showDialogResult);
+            A.CallTo(() => editResponseWindow.Body).Returns(expectedResponseBody);
+            A.CallTo(() => _editResponseWindowFactory.Create()).Returns(editResponseWindow);
 
-            return textAreaWindow;
+            return editResponseWindow;
         }
 
-        private void ExecuteEditBodyCommand()
+        private IEditResponseWindow GivenAEditResponseWindow(bool showDialogResult, IDictionary<string, string> expectedResponseHeaders)
         {
-            _mappingInfoViewModel.EditBodyCommand.Execute(null);
+            var editResponseWindow = A.Fake<IEditResponseWindow>();
+            A.CallTo(() => editResponseWindow.ShowDialog()).Returns(showDialogResult);
+            A.CallTo(() => editResponseWindow.Headers).Returns(expectedResponseHeaders);
+            A.CallTo(() => _editResponseWindowFactory.Create()).Returns(editResponseWindow);
+
+            return editResponseWindow;
+        }
+
+        private static IDictionary<string, string> GivenSomeHeaders()
+        {
+            return new Dictionary<string, string>
+            {
+                { Faker.Lorem.Word(), Faker.Lorem.Word() },
+                { Faker.Lorem.Word(), Faker.Lorem.Word() },
+                { Faker.Lorem.Word(), Faker.Lorem.Word() }
+            };
+        }
+
+        private void ExecuteEditResponseCommand()
+        {
+            _mappingInfoViewModel.EditResponseCommand.Execute(null);
         }
 
         private void ExecuteDeleteMappingCommand()

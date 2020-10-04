@@ -14,22 +14,22 @@ namespace WireMock.GUI.Model
     {
         #region Private fields
 
-        private readonly ITextAreaWindowFactory _textAreaWindowFactory;
+        private readonly IEditResponseWindowFactory _textAreaWindowFactory;
         private string _path;
         private HttpMethod _requestHttpMethod;
         private HttpStatusCode _responseStatusCode;
         private string _responseBody;
-        private string _responseCacheControlMaxAge;
 
         #endregion
 
         #region Initialization
 
-        public MappingInfoViewModel(ITextAreaWindowFactory textAreaWindowFactory)
+        public MappingInfoViewModel(IEditResponseWindowFactory textAreaWindowFactory)
         {
             _textAreaWindowFactory = textAreaWindowFactory;
-            EditBodyCommand = new RelayCommand(o => ExecuteEditBody(), o => true, this);
+            EditResponseCommand = new RelayCommand(o => ExecuteEditResponse(), o => true, this);
             DeleteMappingCommand = new RelayCommand(o => ExecuteDeleteMapping(), o => true, this);
+            ResponseHeaders = new Dictionary<string, string>();
         }
 
         #endregion
@@ -43,7 +43,7 @@ namespace WireMock.GUI.Model
 
         #region Commands
 
-        public ICommand EditBodyCommand { get; }
+        public ICommand EditResponseCommand { get; }
         public ICommand DeleteMappingCommand { get; }
 
         #endregion
@@ -103,28 +103,22 @@ namespace WireMock.GUI.Model
 
         public string MinifiedResponseBody => JsonUtilities.Minify(ResponseBody);
 
-        public string ResponseCacheControlMaxAge
-        {
-            get => _responseCacheControlMaxAge;
-            set
-            {
-                _responseCacheControlMaxAge = value;
-                OnPropertyChanged(nameof(ResponseCacheControlMaxAge));
-            }
-        }
+        public IDictionary<string, string> ResponseHeaders { get; set; }
 
         #endregion
 
         #region Utility Methods
 
-        private void ExecuteEditBody()
+        private void ExecuteEditResponse()
         {
             var textAreaWindow = _textAreaWindowFactory.Create();
-            textAreaWindow.InputValue = ResponseBody;
+            textAreaWindow.Body = ResponseBody;
+            textAreaWindow.Headers = ResponseHeaders;
 
             if (textAreaWindow.ShowDialog())
             {
-                ResponseBody = textAreaWindow.InputValue;
+                ResponseBody = textAreaWindow.Body;
+                ResponseHeaders = textAreaWindow.Headers;
             }
         }
 

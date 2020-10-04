@@ -30,7 +30,7 @@ namespace WireMock.GUI.Mock
             _mockServer.LogEntriesChanged += OnNewRequestsArrived;
         }
 
-        public event IMockServer.NewRequest OnNewRequest;
+        public event NewRequest OnNewRequest;
 
         public void UpdateMappings(IEnumerable<MappingInfoViewModel> mappingInfos)
         {
@@ -39,7 +39,7 @@ namespace WireMock.GUI.Mock
             {
                 _mockServer
                     .Given(GetRequest(mappingInfo.Path, mappingInfo.RequestHttpMethod))
-                    .RespondWith(GetResponse(mappingInfo.ResponseStatusCode, mappingInfo.ResponseBody, mappingInfo.ResponseCacheControlMaxAge));
+                    .RespondWith(GetResponse(mappingInfo.ResponseStatusCode, mappingInfo.ResponseBody, mappingInfo.ResponseHeaders));
             }
         }
 
@@ -67,7 +67,7 @@ namespace WireMock.GUI.Mock
             return new Tuple<string, string>(uri.AbsolutePath, uri.Query);
         }
 
-        private static IResponseProvider GetResponse(HttpStatusCode statusCode, string body, string cacheControlMaxAge)
+        private static IResponseProvider GetResponse(HttpStatusCode statusCode, string body, IDictionary<string, string> headers)
         {
             var response = Response.Create()
                 .WithStatusCode(statusCode);
@@ -77,9 +77,9 @@ namespace WireMock.GUI.Mock
                 response.WithBody(requestMessage => AdjustBody(body));
             }
 
-            if (cacheControlMaxAge != null)
+            foreach (var header in headers)
             {
-                response.WithHeader("Cache-Control", $"max-age={cacheControlMaxAge}");
+                response.WithHeader(header.Key, header.Value);
             }
 
             return response;

@@ -18,7 +18,7 @@ namespace WireMock.GUI.Model
 
         private readonly IMockServer _mockServer;
         private readonly IMappingsProvider _mappingsProvider;
-        private readonly ITextAreaWindowFactory _textAreaWindowFactory;
+        private readonly IEditResponseWindowFactory _textAreaWindowFactory;
         private string _logs;
 
         #endregion
@@ -131,7 +131,7 @@ namespace WireMock.GUI.Model
                 RequestHttpMethod = mapping.RequestHttpMethod,
                 ResponseStatusCode = mapping.ResponseStatusCode,
                 ResponseBody = mapping.ResponseBody,
-                ResponseCacheControlMaxAge = mapping.ResponseCacheControlMaxAge
+                ResponseHeaders = mapping.Headers
             };
         }
 
@@ -148,7 +148,7 @@ namespace WireMock.GUI.Model
                 RequestHttpMethod = mapping.RequestHttpMethod,
                 ResponseStatusCode = mapping.ResponseStatusCode,
                 ResponseBody = mapping.ResponseBody,
-                ResponseCacheControlMaxAge = mapping.ResponseCacheControlMaxAge
+                Headers = mapping.ResponseHeaders
             };
         }
 

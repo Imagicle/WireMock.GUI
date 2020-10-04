@@ -40,7 +40,7 @@ namespace WireMock.GUI.Test.Mock
         {
             var mappingInfoViewModels = new List<MappingInfoViewModel>
             {
-                new MappingInfoViewModel(A.Fake<ITextAreaWindowFactory>()) { Path = path }
+                new MappingInfoViewModel(A.Fake<IEditResponseWindowFactory>()) { Path = path }
             };
 
             MockServer.UpdateMappings(mappingInfoViewModels);
@@ -59,7 +59,7 @@ namespace WireMock.GUI.Test.Mock
         {
             var mappingInfoViewModels = new List<MappingInfoViewModel>
             {
-                new MappingInfoViewModel(A.Fake<ITextAreaWindowFactory>()) { RequestHttpMethod = invalidHttpMethod }
+                new MappingInfoViewModel(A.Fake<IEditResponseWindowFactory>()) { RequestHttpMethod = invalidHttpMethod }
             };
 
             MockServer.Invoking(m => m.UpdateMappings(mappingInfoViewModels)).Should().Throw<ArgumentOutOfRangeException>();
@@ -146,7 +146,13 @@ namespace WireMock.GUI.Test.Mock
             return wireMockMapping.Request.Path.Matchers.First().Pattern.Equals($"/{mappingInfoViewModel.Path}") &&
                    wireMockMapping.Request.Methods.First().Equals(mappingInfoViewModel.RequestHttpMethod.ToString(), StringComparison.InvariantCultureIgnoreCase) &&
                    wireMockMapping.Response.StatusCode.Equals(mappingInfoViewModel.ResponseStatusCode) &&
-                   wireMockMapping.Response.Headers.CacheControl.Equals($"max-age={mappingInfoViewModel.ResponseCacheControlMaxAge}");
+                   ShouldBeEquivalent(wireMockMapping.Response.Headers, mappingInfoViewModel.ResponseHeaders);
+        }
+
+        private static bool ShouldBeEquivalent(Headers wireMockHeaders, IDictionary<string, string> mappingInfoViewModelHeaders)
+        {
+            return wireMockHeaders.ContentType == mappingInfoViewModelHeaders["Content-Type"] &&
+                   wireMockHeaders.CacheControl == mappingInfoViewModelHeaders["Cache-Control"];
         }
 
         private static IList<Mapping> GetWireMockMappings()
@@ -215,6 +221,9 @@ namespace WireMock.GUI.Test.Mock
         [DataContract]
         public class Headers
         {
+            [DataMember(Name = "Content-Type")]
+            public string ContentType { get; set; }
+
             [DataMember(Name = "Cache-Control")]
             public string CacheControl { get; set; }
         }

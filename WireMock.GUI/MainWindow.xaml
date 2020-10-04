@@ -25,9 +25,8 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="80" />
                                         <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="300" />
-                                        <ColumnDefinition Width="100" />
-                                    </Grid.ColumnDefinitions>
+										<ColumnDefinition Width="350" />
+									</Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0"
                                                Padding="5 0 0 0"
@@ -38,13 +37,10 @@
                                     <TextBlock Grid.Column="2"
                                                Padding="5 0 0 0"
                                                Text="Status code"></TextBlock>
-                                    <TextBlock Grid.Column="3"
+									<TextBlock Grid.Column="3"
                                                Padding="5 0 0 0"
-                                               Text="Response body"></TextBlock>
-                                    <TextBlock Grid.Column="4"
-                                               Padding="5 0 0 0"
-                                               Text="Max Age (s)"></TextBlock>
-                                </Grid>
+                                               Text="Response"></TextBlock>
+								</Grid>
                                 <ItemsPresenter />
                             </DockPanel>
                         </ControlTemplate>
@@ -57,9 +53,8 @@
                                     <ColumnDefinition Width="80" />
                                     <ColumnDefinition Width="100" />
                                     <ColumnDefinition Width="250" />
-                                    <ColumnDefinition Width="50" />
-                                    <ColumnDefinition Width="50" />
-                                    <ColumnDefinition Width="50" />
+									<ColumnDefinition Width="50" />
+									<ColumnDefinition Width="50" />
                                 </Grid.ColumnDefinitions>
 
                                 <TextBox Grid.Column="0" 
@@ -75,14 +70,11 @@
                                 <TextBlock Grid.Column="3" 
                                          Margin="10 0 0 0"
                                          Text="{Binding Path=MinifiedResponseBody, UpdateSourceTrigger=PropertyChanged}" />
-                                <Button Grid.Column="4"
+								<Button Grid.Column="4"
                                         Margin="10 0 0 0"
                                         Content="Edit"
-                                        Command="{Binding EditBodyCommand}" />
-                                <TextBox Grid.Column="5" 
-                                         Margin="10 0 0 0"
-                                         Text="{Binding Path=ResponseCacheControlMaxAge, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" />
-                                <Button Grid.Column="6"
+                                        Command="{Binding EditResponseCommand}" />
+								<Button Grid.Column="5"
                                         Margin="10 0 0 0"
                                         Content="Delete"
                                         Command="{Binding DeleteMappingCommand}" />

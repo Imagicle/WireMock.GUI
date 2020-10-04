@@ -22,13 +22,17 @@ namespace WireMock.GUI.Test.TestUtils
 
         internal static MappingInfoViewModel AMapping()
         {
-            return new MappingInfoViewModel(A.Fake<ITextAreaWindowFactory>())
+            return new MappingInfoViewModel(A.Fake<IEditResponseWindowFactory>())
             {
                 Path = FakerWrapper.Faker.Lorem.Word(),
                 RequestHttpMethod = GetValidHttpMethod(),
                 ResponseStatusCode = FakerWrapper.Faker.PickRandom<HttpStatusCode>(),
                 ResponseBody = FakerWrapper.Faker.Lorem.Sentence(),
-                ResponseCacheControlMaxAge = FakerWrapper.Faker.Lorem.Word()
+                ResponseHeaders = new Dictionary<string, string>
+                {
+                    {"Content-Type", FakerWrapper.Faker.Lorem.Word() },
+                    {"Cache-Control", FakerWrapper.Faker.Lorem.Word() }
+                }
             };
         }
 
