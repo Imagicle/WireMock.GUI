@@ -7,4 +7,4 @@
  ╚══╝╚══╝ ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝ ╚═════╝  ╚═════╝ ╚═╝
 </pre>
 
-[![Actions Status](https://github.com/guerital/WireMock.GUI/workflows/.NET%20Core/badge.svg)](https://github.com/guerital/WireMock.GUI/actions)
+![Build](https://github.com/guerital/WireMock.GUI/workflows/.NET%20Core/badge.svg)
