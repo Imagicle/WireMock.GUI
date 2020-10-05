@@ -128,6 +128,20 @@ namespace WireMock.GUI.Test.Mock
                 .WithArgs(EqualTo(mapping));
         }
 
+        [Test]
+        public void ItShouldBePossibleToChangeTheDefaultUrl()
+        {
+            const string aNewUrl = "http://localhost:15948/";
+            MockServer.Stop();
+            MockServer.Url = aNewUrl;
+            MockServer.Start();
+            var mapping = GivenAMapping(new MappingForTest());
+
+            var httpStatusCode = GetHttpStatusCode(() => MakeHttpRequest(aNewUrl, mapping.Path, mapping.RequestHttpMethod));
+
+            httpStatusCode.Should().Be((int)mapping.ResponseStatusCode);
+        }
+
         #region Utility Methods
 
         private MappingInfoViewModel GivenAMapping(MappingForTest mapping)
@@ -156,7 +170,12 @@ namespace WireMock.GUI.Test.Mock
 
         private static WebResponse MakeHttpRequest(string path, HttpMethod method)
         {
-            var request = WebRequest.Create($"{WireMockBindUrl}{path}");
+            return MakeHttpRequest(WireMockBindUrl, path, method);
+        }
+
+        private static WebResponse MakeHttpRequest(string baseUrl, string path, HttpMethod method)
+        {
+            var request = WebRequest.Create($"{baseUrl}{path}");
             request.Method = method.ToString();
             request.ContentLength = 0;
 

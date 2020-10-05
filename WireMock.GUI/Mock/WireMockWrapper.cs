@@ -18,19 +18,32 @@ namespace WireMock.GUI.Mock
 {
     internal class WireMockWrapper : IMockServer
     {
-        private readonly FluentMockServer _mockServer;
+        private FluentMockServer _mockServer;
+        private string _url;
 
         public WireMockWrapper()
         {
-            _mockServer = FluentMockServer.Start(new FluentMockServerSettings
-            {
-                Urls = new[] { "http://localhost:12345/" },
-                StartAdminInterface = true
-            });
-            _mockServer.LogEntriesChanged += OnNewRequestsArrived;
+            _url = "http://localhost:12345/";
+            Start();
         }
 
         public event NewRequest OnNewRequest;
+
+        public event ServerStatus OnServerStatusChange;
+
+        public string Url
+        {
+            get => _url;
+            set
+            {
+                if (_mockServer.IsStarted)
+                {
+                    throw new InvalidOperationException("Cannot change the mock server URL if the server is running!");
+                }
+
+                _url = value;
+            }
+        }
 
         public void UpdateMappings(IEnumerable<MappingInfoViewModel> mappingInfos)
         {
@@ -43,13 +56,39 @@ namespace WireMock.GUI.Mock
             }
         }
 
+        public void Start()
+        {
+            Start(Url);
+        }
+
         public void Stop()
         {
             _mockServer.Stop();
             Wait.ForCondition(() => !_mockServer.IsStarted);
+            SendOnServerStatusChange(false);
         }
 
         #region Utility Methods
+
+        private void Start(string url)
+        {
+            _mockServer = FluentMockServer.Start(new FluentMockServerSettings
+            {
+                Urls = new[] {url},
+                StartAdminInterface = true
+            });
+            _mockServer.LogEntriesChanged += OnNewRequestsArrived;
+            
+            SendOnServerStatusChange(true);
+        }
+
+        private void SendOnServerStatusChange(bool isStarted)
+        {
+            OnServerStatusChange?.Invoke(new ServerStatusChangeEventArgs
+            {
+                IsStarted = isStarted
+            });
+        }
 
         private static IRequestBuilder GetRequest(string pathAndQueryString, HttpMethod httpMethod)
         {
@@ -77,9 +116,9 @@ namespace WireMock.GUI.Mock
                 response.WithBody(requestMessage => AdjustBody(body));
             }
 
-            foreach (var header in headers)
+            foreach (var (key, value) in headers)
             {
-                response.WithHeader(header.Key, header.Value);
+                response.WithHeader(key, value);
             }
 
             return response;

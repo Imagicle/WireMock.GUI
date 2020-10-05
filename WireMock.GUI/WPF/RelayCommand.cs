@@ -6,7 +6,6 @@ using System.Windows.Threading;
 
 namespace WireMock.GUI.WPF
 {
-    // TODO: use IMALIB-52 when done
     public class RelayCommand : ICommand
     {
         private readonly Action<object> _action;

@@ -9,6 +9,7 @@ using WireMock.GUI.Mapping;
 using WireMock.GUI.Mock;
 using WireMock.GUI.Model;
 using WireMock.GUI.Test.TestUtils;
+using static WireMock.GUI.Test.TestUtils.FakerWrapper;
 
 namespace WireMock.GUI.Test.Model
 {
@@ -32,6 +33,98 @@ namespace WireMock.GUI.Test.Model
             _mappingsProvider = A.Fake<IMappingsProvider>();
             _mainWindowViewModel = new MainWindowViewModel(_mockServer, _mappingsProvider);
             ExecuteClearCommand();
+        }
+
+        #endregion
+
+        #region StartServerCommand
+
+        [Test]
+        public void StartServerCommand_ShouldStartTheServer()
+        {
+            var expectedServerUrl = Faker.Lorem.Word();
+            _mainWindowViewModel.ServerUrl = expectedServerUrl;
+
+            ExecuteStartServerCommand();
+
+            A.CallToSet(() => _mockServer.Url).WhenArgumentsMatch(args => args.Get<string>(0) == expectedServerUrl).MustHaveHappenedOnceExactly()
+                .Then(A.CallTo(() => _mockServer.Start()).MustHaveHappenedOnceExactly());
+        }
+
+        #endregion
+
+        #region StopServerCommand
+
+        [Test]
+        public void StopServerCommand_ShouldStopTheServer()
+        {
+            ExecuteStopServerCommand();
+
+            A.CallTo(() => _mockServer.Stop()).MustHaveHappenedOnceExactly();
+        }
+
+        #endregion
+
+        #region ServerUrl
+
+        [Test]
+        public void ServerUrl_ShouldBeInitializedWithDefaultMockServerUrl()
+        {
+            var expectedUrl = Faker.Internet.Url();
+            _mockServer.Url = expectedUrl;
+
+            _mainWindowViewModel = new MainWindowViewModel(_mockServer, _mappingsProvider);
+
+            _mainWindowViewModel.ServerUrl.Should().Be(expectedUrl);
+        }
+
+        [Test]
+        public void WhenServerUrlIsModified_ServerUrl_ShouldRaiseAnEvent()
+        {
+            var expectedServerUrl = Faker.Lorem.Word();
+            using var monitor = _mainWindowViewModel.Monitor();
+
+            _mainWindowViewModel.ServerUrl = expectedServerUrl;
+
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.ServerUrl);
+        }
+
+        [Test]
+        public void ServerUrl_ShouldBeEditable()
+        {
+            var expectedServerUrl = Faker.Lorem.Word();
+
+            _mainWindowViewModel.ServerUrl = expectedServerUrl;
+
+            _mainWindowViewModel.ServerUrl.Should().Be(expectedServerUrl);
+        }
+
+        #endregion
+
+        #region IsServerStarted
+
+        [Test]
+        public void IsServerStarted_ShouldHaveDefaultValue()
+        {
+            _mainWindowViewModel.IsServerStarted.Should().BeTrue();
+        }
+
+        [Test]
+        public void WhenEventOnServerStatusChangeIsRaised_IsServerStarted_ShouldBeUpdated([Values] bool expectedIsServerStarted)
+        {
+            _mockServer.OnServerStatusChange += Raise.FreeForm.With(AServerStatusChangeEventArgs(expectedIsServerStarted));
+
+            _mainWindowViewModel.IsServerStarted.Should().Be(expectedIsServerStarted);
+        }
+
+        [Test]
+        public void WhenIsServerStartedIsModified_IsServerStarted_ShouldRaiseAnEvent()
+        {
+            using var monitor = _mainWindowViewModel.Monitor();
+
+            _mockServer.OnServerStatusChange += Raise.FreeForm.With(AServerStatusChangeEventArgs(Faker.Random.Bool()));
+
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.IsServerStarted);
         }
 
         #endregion
@@ -172,13 +265,20 @@ namespace WireMock.GUI.Test.Model
 
         private static NewRequestEventArgs ANewRequestEventArgs()
         {
-            var args = new NewRequestEventArgs
+            return new NewRequestEventArgs
             {
-                HttpMethod = FakerWrapper.Faker.PickRandom<HttpMethod>(),
-                Path = FakerWrapper.Faker.Lorem.Word(),
-                Body = FakerWrapper.Faker.Lorem.Sentence()
+                HttpMethod = Faker.PickRandom<HttpMethod>(),
+                Path = Faker.Lorem.Word(),
+                Body = Faker.Lorem.Sentence()
             };
-            return args;
+        }
+
+        private static ServerStatusChangeEventArgs AServerStatusChangeEventArgs(bool isStarted)
+        {
+            return new ServerStatusChangeEventArgs
+            {
+                IsStarted = isStarted
+            };
         }
 
         private static IEnumerable<PersistableMappingInfo> ToPersistableMappings(IEnumerable<MappingInfoViewModel> mappings)
@@ -196,6 +296,16 @@ namespace WireMock.GUI.Test.Model
                 ResponseBody = mapping.ResponseBody,
                 Headers = mapping.ResponseHeaders
             };
+        }
+
+        private void ExecuteStartServerCommand()
+        {
+            _mainWindowViewModel.StartServerCommand.Execute(null);
+        }
+
+        private void ExecuteStopServerCommand()
+        {
+            _mainWindowViewModel.StopServerCommand.Execute(null);
         }
 
         private void ExecuteAddCommand()

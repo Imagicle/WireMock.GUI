@@ -9,38 +9,71 @@
     <Grid d:DataContext="{d:DesignInstance model:MainWindowViewModel}"
           Margin="10 0 10 10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="25" />
             <RowDefinition Height="200" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0 5 0 10">
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="70" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0">Server URL:</Label>
+
+            <TextBox Grid.Column="1" 
+                     VerticalContentAlignment="Center"
+                     Margin="10 0 0 0"
+                     Text="{Binding ServerUrl}"
+                     IsEnabled="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}" />
+
+            <Button Grid.Column="2"
+                    Margin="10 0 0 0"
+                    Content="Start"
+                    Command="{Binding StartServerCommand}"
+                    IsEnabled="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}" />
+
+            <Button Grid.Column="3"
+                    Margin="10 0 0 0"
+                    Content="Stop"
+                    Command="{Binding StopServerCommand}"
+                    IsEnabled="{Binding IsServerStarted}" />
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="0 5 0 10">
             <ScrollViewer>
                 <ListBox ItemsSource="{Binding Mappings}" HorizontalContentAlignment="Stretch">
                     <ListBox.Template>
                         <ControlTemplate>
                             <DockPanel LastChildFill="True">
-                                <Grid DockPanel.Dock="Top" Height="23">
+                                <Grid DockPanel.Dock="Top" Height="25">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="80" />
                                         <ColumnDefinition Width="100" />
-										<ColumnDefinition Width="350" />
-									</Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="350" />
+                                    </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0"
                                                Padding="5 0 0 0"
-                                               Text="Path"></TextBlock>
+                                               Text="Path" />
+
                                     <TextBlock Grid.Column="1"
                                                Padding="5 0 0 0"
-                                               Text="Method"></TextBlock>
+                                               Text="Method" />
+
                                     <TextBlock Grid.Column="2"
                                                Padding="5 0 0 0"
-                                               Text="Status code"></TextBlock>
-									<TextBlock Grid.Column="3"
+                                               Text="Status code" />
+
+                                    <TextBlock Grid.Column="3"
                                                Padding="5 0 0 0"
-                                               Text="Response"></TextBlock>
-								</Grid>
+                                               Text="Response" />
+                                </Grid>
                                 <ItemsPresenter />
                             </DockPanel>
                         </ControlTemplate>
@@ -53,28 +86,34 @@
                                     <ColumnDefinition Width="80" />
                                     <ColumnDefinition Width="100" />
                                     <ColumnDefinition Width="250" />
-									<ColumnDefinition Width="50" />
-									<ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="50" />
                                 </Grid.ColumnDefinitions>
 
-                                <TextBox Grid.Column="0" 
+                                <TextBox Grid.Column="0"
+                                         VerticalContentAlignment="Center"
                                          Text="{Binding Path=Path, UpdateSourceTrigger=PropertyChanged}" />
+
                                 <ComboBox Grid.Column="1"
                                           Margin="10 0 0 0"
                                           SelectedItem="{Binding Path=RequestHttpMethod}"
                                           ItemsSource="{Binding Path=HttpMethods}" />
+
                                 <ComboBox Grid.Column="2"
                                           Margin="10 0 0 0"
                                           SelectedItem="{Binding Path=ResponseStatusCode}"
                                           ItemsSource="{Binding Path=HttpStatusCodes}" />
-                                <TextBlock Grid.Column="3" 
-                                         Margin="10 0 0 0"
-                                         Text="{Binding Path=MinifiedResponseBody, UpdateSourceTrigger=PropertyChanged}" />
-								<Button Grid.Column="4"
+
+                                <TextBlock Grid.Column="3"
+                                           Margin="10 0 0 0"
+                                           Text="{Binding Path=MinifiedResponseBody, UpdateSourceTrigger=PropertyChanged}" />
+
+                                <Button Grid.Column="4"
                                         Margin="10 0 0 0"
                                         Content="Edit"
                                         Command="{Binding EditResponseCommand}" />
-								<Button Grid.Column="5"
+
+                                <Button Grid.Column="5"
                                         Margin="10 0 0 0"
                                         Content="Delete"
                                         Command="{Binding DeleteMappingCommand}" />
@@ -85,7 +124,7 @@
             </ScrollViewer>
         </Grid>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Padding="10 0"
                     Content="Clear Mappings" 
                     Command="{Binding ClearCommand}" />
@@ -98,10 +137,11 @@
             <Button Width="70"
                     Margin="10 0 0 0"
                     Content="Apply" 
-                    Command="{Binding ApplyCommand}" />
+                    Command="{Binding ApplyCommand}"
+                    IsEnabled="{Binding IsServerStarted}" />
         </StackPanel>
 
-        <TextBox Grid.Row="2" Margin="0 15 0 0" 
+        <TextBox Grid.Row="3" Margin="0 15 0 0" 
                  IsReadOnly="True" TextWrapping="NoWrap" 
                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible"
                  Text="{Binding Path=Logs, UpdateSourceTrigger=PropertyChanged}" />

@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Runtime.Serialization;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using NUnit.Framework;
+using WireMock.GUI.Mock;
 using WireMock.GUI.Model;
 using WireMock.GUI.Test.TestUtils;
 using WireMock.GUI.Window;
+using static WireMock.GUI.Test.TestUtils.FakerWrapper;
 
 namespace WireMock.GUI.Test.Mock
 {
@@ -18,7 +21,7 @@ namespace WireMock.GUI.Test.Mock
     {
         #region Fixture
 
-        private const string WireMockBindUrl = "http://localhost:12345/";
+        private const string WireMockDefaultBindUrl = "http://localhost:12345/";
 
         #endregion
 
@@ -88,6 +91,64 @@ namespace WireMock.GUI.Test.Mock
 
         #endregion
 
+        #region Url
+
+        [Test]
+        public void Url_ShouldHaveDefaultValue()
+        {
+            MockServer.Url.Should().Be(WireMockDefaultBindUrl);
+        }
+
+        [Test]
+        public void IfServiceIsStopped_Url_ShouldBeEditable()
+        {
+            MockServer.Stop();
+            var expectedUrl = Faker.Internet.Url();
+
+            MockServer.Url = expectedUrl;
+
+            MockServer.Url.Should().Be(expectedUrl);
+        }
+
+        [Test]
+        public void IfServiceIsStarted_Url_ShouldNotBeEditable()
+        {
+            var expectedUrl = Faker.Internet.Url();
+
+            this.Invoking(t => MockServer.Url = expectedUrl)
+                .Should().ThrowExactly<InvalidOperationException>()
+                .And.Message.Should().Be("Cannot change the mock server URL if the server is running!");
+            MockServer.Url.Should().NotBe(expectedUrl);
+        }
+
+        #endregion
+
+        #region Start
+
+        [Test]
+        public void Start_ShouldStartWireMock()
+        {
+            MockServer.Stop();
+
+            MockServer.Start();
+
+            WireMockShouldBeStarted();
+        }
+
+        [Test]
+        public void Start_ShouldRaiseOnServerStatusChangeEvent()
+        {
+            MockServer.Stop();
+            using var monitor = MockServer.Monitor();
+            MockServer.Start();
+
+            monitor.Should()
+                .Raise(nameof(MockServer.OnServerStatusChange))
+                .WithArgs(EqualTo(true));
+        }
+
+        #endregion
+
         #region Stop
 
         [Test]
@@ -96,6 +157,17 @@ namespace WireMock.GUI.Test.Mock
             MockServer.Stop();
 
             WireMockShouldBeStopped();
+        }
+
+        [Test]
+        public void Stop_ShouldRaiseOnServerStatusChangeEvent()
+        {
+            using var monitor = MockServer.Monitor();
+            MockServer.Stop();
+
+            monitor.Should()
+                .Raise(nameof(MockServer.OnServerStatusChange))
+                .WithArgs(EqualTo(false));
         }
 
         #endregion
@@ -116,7 +188,7 @@ namespace WireMock.GUI.Test.Mock
         {
             try
             {
-                WebRequest.Create($"{WireMockBindUrl}__admin/mappings").GetResponse();
+                WebRequest.Create($"{WireMockDefaultBindUrl}__admin/mappings").GetResponse();
             }
             catch (Exception)
             {
@@ -157,8 +229,13 @@ namespace WireMock.GUI.Test.Mock
 
         private static IList<Mapping> GetWireMockMappings()
         {
-            var webResponse = WebRequest.Create($"{WireMockBindUrl}__admin/mappings").GetResponse();
+            var webResponse = WebRequest.Create($"{WireMockDefaultBindUrl}__admin/mappings").GetResponse();
             return ReadStream<Mapping[]>(webResponse.GetResponseStream());
+        }
+
+        private static Expression<Func<ServerStatusChangeEventArgs, bool>> EqualTo(bool isStarted)
+        {
+            return args => args.IsStarted == isStarted;
         }
 
         #endregion

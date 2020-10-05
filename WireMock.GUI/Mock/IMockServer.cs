@@ -7,7 +7,13 @@ namespace WireMock.GUI.Mock
     {
         event NewRequest OnNewRequest;
 
+        event ServerStatus OnServerStatusChange;
+
+        string Url { get; set; }
+
         void UpdateMappings(IEnumerable<MappingInfoViewModel> mappingInfos);
+
+        void Start();
 
         void Stop();
     }

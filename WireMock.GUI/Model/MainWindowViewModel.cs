@@ -19,6 +19,8 @@ namespace WireMock.GUI.Model
         private readonly IMockServer _mockServer;
         private readonly IMappingsProvider _mappingsProvider;
         private readonly IEditResponseWindowFactory _textAreaWindowFactory;
+        private string _serverUrl;
+        private bool _isServerStarted;
         private string _logs;
 
         #endregion
@@ -29,19 +31,28 @@ namespace WireMock.GUI.Model
         {
             _mockServer = mockServer;
             _mockServer.OnNewRequest += OnNewRequest;
+            _mockServer.OnServerStatusChange += OnServerStatusChange;
             _mappingsProvider = mappingsProvider;
             _textAreaWindowFactory = new TextAreaWindowFactory();
+
+            StartServerCommand = new RelayCommand(o => ExecuteStartServerCommand(), o => true, this);
+            StopServerCommand = new RelayCommand(o => ExecuteStopServerCommand(), o => true, this);
             AddCommand = new RelayCommand(o => ExecuteAddCommand(), o => true, this);
             ApplyCommand = new RelayCommand(o => ExecuteApplyCommand(), o => true, this);
             ClearCommand = new RelayCommand(o => ExecuteClearCommand(), o => true, this);
+
             InitMappings();
-            Logs = string.Empty;
+            _serverUrl = _mockServer.Url;
+            _isServerStarted = true;
+            _logs = string.Empty;
         }
 
         #endregion
 
         #region Commands
 
+        public ICommand StartServerCommand { get; }
+        public ICommand StopServerCommand { get; }
         public ICommand AddCommand { get; }
         public ICommand ApplyCommand { get; }
         public ICommand ClearCommand { get; }
@@ -49,6 +60,26 @@ namespace WireMock.GUI.Model
         #endregion
 
         #region Properties
+
+        public string ServerUrl
+        {
+            get => _serverUrl;
+            set
+            {
+                _serverUrl = value;
+                OnPropertyChanged(nameof(ServerUrl));
+            }
+        }
+
+        public bool IsServerStarted
+        {
+            get => _isServerStarted;
+            private set
+            {
+                _isServerStarted = value;
+                OnPropertyChanged(nameof(IsServerStarted));
+            }
+        }
 
         public ObservableCollection<MappingInfoViewModel> Mappings { get; private set; }
 
@@ -84,6 +115,17 @@ namespace WireMock.GUI.Model
             }
         }
 
+        private void ExecuteStartServerCommand()
+        {
+            _mockServer.Url = ServerUrl;
+            _mockServer.Start();
+        }
+
+        private void ExecuteStopServerCommand()
+        {
+            _mockServer.Stop();
+        }
+
         private void ExecuteAddCommand()
         {
             AddMapping(new MappingInfoViewModel(_textAreaWindowFactory)
@@ -116,6 +158,11 @@ namespace WireMock.GUI.Model
         private void OnNewRequest(NewRequestEventArgs e)
         {
             Logs += $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{e.HttpMethod}] Path: {{{e.Path}}} Request body: {{{e.Body}}}\n";
+        }
+
+        private void OnServerStatusChange(ServerStatusChangeEventArgs e)
+        {
+            IsServerStarted = e.IsStarted;
         }
 
         private void OnDeleteMapping(MappingInfoViewModel mapping)
