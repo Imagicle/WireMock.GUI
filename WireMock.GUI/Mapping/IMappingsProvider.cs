@@ -2,7 +2,7 @@
 
 namespace WireMock.GUI.Mapping
 {
-    internal interface IMappingsProvider
+    public interface IMappingsProvider
     {
         IEnumerable<PersistableMappingInfo> LoadMappings();
 

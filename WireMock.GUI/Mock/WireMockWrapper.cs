@@ -111,8 +111,8 @@ namespace WireMock.GUI.Mock
                 "GET" => HttpMethod.Get,
                 "POST" => HttpMethod.Post,
                 "PUT" => HttpMethod.Put,
-                "Delete" => HttpMethod.Delete,
-                "Patch" => HttpMethod.Patch,
+                "DELETE" => HttpMethod.Delete,
+                "PATCH" => HttpMethod.Patch,
                 _ => throw new ArgumentOutOfRangeException(nameof(method), method, null)
             };
         }

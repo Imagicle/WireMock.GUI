@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 
 namespace WireMock.GUI.Mapping
 {
-    internal class PersistableMappingInfo
+    public class PersistableMappingInfo
     {
         public string Path { get; set; }
         public HttpMethod RequestHttpMethod { get; set; }

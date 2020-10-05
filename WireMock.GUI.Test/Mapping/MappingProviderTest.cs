@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using FluentAssertions;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using NUnit.Framework;
@@ -82,11 +81,7 @@ namespace WireMock.GUI.Test.Mapping
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
         private static string GetTestFilePath()
         {
-            var codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            var uri = new UriBuilder(codeBase);
-            var path = Uri.UnescapeDataString(uri.Path);
-            var testAssemblyPath = new DirectoryInfo(path).Parent.Parent.Parent;
-            return Path.Combine(testAssemblyPath.FullName, "Mapping", "mappings.json");
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Mapping", "mappings.json");
         }
 
         private static IEnumerable<PersistableMappingInfo> Mappings()
