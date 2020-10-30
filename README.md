@@ -10,7 +10,7 @@
 A graphical user interface application for windows to easily mock your APIs, built on top of the [WireMock.Net](https://github.com/WireMock-Net/WireMock.Net) library.
 
 ## Info
-![Build](https://github.com/Imagicle/WireMock.GUI/workflows/.NET%20Core/badge.svg)
+![Master Build](https://github.com/Imagicle/WireMock.GUI/workflows/master/badge.svg)
 
 ## Usage
 
