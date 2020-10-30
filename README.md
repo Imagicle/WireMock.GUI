@@ -14,7 +14,7 @@ A graphical user interface application for windows to easily mock your APIs, bui
 
 ## Usage
 
-Download and run WireMock.Net.exe from the [releases](https://github.com/Imagicle/WireMock.GUI/releases).
+Download and run WireMock.GUI.exe from the [releases](https://github.com/Imagicle/WireMock.GUI/releases).
 
 ## Development
 
@@ -30,4 +30,4 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 Please make sure to update tests as appropriate.
 
 ## License
-[Todo](todo)
+[Apache-2.0](https://github.com/Imagicle/WireMock.GUI/blob/master/LICENSE)
