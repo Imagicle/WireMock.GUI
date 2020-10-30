@@ -241,7 +241,7 @@ namespace WireMock.GUI.Test.Model
             var persistableMappings = ToPersistableMappings(new List<MappingInfoViewModel> { mapping1, mapping2, mapping3 });
             A.CallTo(() => _mappingsProvider.LoadMappings()).Returns(persistableMappings);
             _mainWindowViewModel = new MainWindowViewModel(_mockServer, _mappingsProvider);
-            var refreshedMapping2 = _mainWindowViewModel.Mappings.Single(m => m.Path == mapping2.Path);
+            var refreshedMapping2 = _mainWindowViewModel.Mappings.Single(m => AreEqual(m, mapping2));
 
             refreshedMapping2.DeleteMappingCommand.Execute(null);
 
@@ -341,6 +341,20 @@ namespace WireMock.GUI.Test.Model
             try
             {
                 persistableMappings1.Should().BeEquivalentTo(persistableMappings2);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool AreEqual(MappingInfoViewModel mappingInfoViewModel1, MappingInfoViewModel mappingInfoViewModel2)
+        {
+            try
+            {
+                mappingInfoViewModel1.Should().BeEquivalentTo(mappingInfoViewModel2);
             }
             catch
             {
