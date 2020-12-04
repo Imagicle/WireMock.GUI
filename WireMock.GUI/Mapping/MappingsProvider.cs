@@ -23,7 +23,7 @@ namespace WireMock.GUI.Mapping
         public void SaveMappings(IEnumerable<PersistableMappingInfo> mappings)
         {
             var serializedMappings = JsonConvert.SerializeObject(mappings);
-            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "mappings.json"), serializedMappings);
+            File.WriteAllText(_mappingsFile, serializedMappings);
         }
     }
 }
