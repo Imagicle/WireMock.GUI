@@ -73,5 +73,34 @@ namespace WireMock.GUI.Test.Model
         }
 
         #endregion
+
+        #region DeleteHeaderCommand
+
+        [Test]
+        public void IfThereAreNoSubscribersForTheEventOnDeleteHeader_DeleteHeaderCommand_ShouldNotThrow()
+        {
+            this.Invoking(t => t.ExecuteDeleteHeaderCommand()).Should().NotThrow();
+        }
+
+        [Test]
+        public void DeleteHeaderCommand_ShouldThrowOnDeleteEvent()
+        {
+            using var monitor = _headerViewModel.Monitor();
+
+            ExecuteDeleteHeaderCommand();
+
+            monitor.Should().Raise(nameof(_headerViewModel.OnDeleteHeader));
+        }
+
+        #endregion
+
+        #region Utility Methods
+
+        private void ExecuteDeleteHeaderCommand()
+        {
+            _headerViewModel.DeleteHeaderCommand.Execute(null);
+        }
+
+        #endregion
     }
 }
