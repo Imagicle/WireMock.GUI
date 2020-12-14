@@ -5,5 +5,7 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <wpf:InvertBoolConverter x:Key="InvertBoolConverter" />
+        <wpf:HttpStatusCodesConverter x:Key="HttpStatusCodesConverter" />
+        <wpf:HttpStatusCodeConverter x:Key="HttpStatusCodeConverter" />
     </Application.Resources>
 </Application>

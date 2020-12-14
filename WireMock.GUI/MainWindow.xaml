@@ -101,8 +101,8 @@
 
                                 <ComboBox Grid.Column="2"
                                           Margin="10 0 0 0"
-                                          SelectedItem="{Binding Path=ResponseStatusCode}"
-                                          ItemsSource="{Binding Path=HttpStatusCodes}" />
+                                          SelectedItem="{Binding Path=ResponseStatusCode, Converter={StaticResource HttpStatusCodeConverter}}"
+                                          ItemsSource="{Binding Path=HttpStatusCodes, Converter={StaticResource HttpStatusCodesConverter}}" />
 
                                 <TextBlock Grid.Column="3"
                                            Margin="10 0 0 0"
