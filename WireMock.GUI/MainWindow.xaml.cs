@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Microsoft.Extensions.Logging;
 using WireMock.GUI.Mapping;
 using WireMock.GUI.Mock;
 using WireMock.GUI.Model;

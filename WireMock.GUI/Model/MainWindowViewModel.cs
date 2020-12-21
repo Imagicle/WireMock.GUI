@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Windows.Input;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using WireMock.GUI.Mapping;
 using WireMock.GUI.Mock;
 using WireMock.GUI.Window;
@@ -18,6 +20,7 @@ namespace WireMock.GUI.Model
 
         private readonly IMockServer _mockServer;
         private readonly IMappingsProvider _mappingsProvider;
+        private readonly ILogger<MainWindowViewModel> _logger;
         private readonly IEditResponseWindowFactory _textAreaWindowFactory;
         private string _serverUrl;
         private bool _isServerStarted;
@@ -33,6 +36,7 @@ namespace WireMock.GUI.Model
             _mockServer.OnNewRequest += OnNewRequest;
             _mockServer.OnServerStatusChange += OnServerStatusChange;
             _mappingsProvider = mappingsProvider;
+            _logger = new Logger<MainWindowViewModel>(new NLogLoggerFactory());
             _textAreaWindowFactory = new TextAreaWindowFactory();
 
             StartServerCommand = new RelayCommand(o => ExecuteStartServerCommand(), o => true, this);
@@ -157,6 +161,7 @@ namespace WireMock.GUI.Model
 
         private void OnNewRequest(NewRequestEventArgs e)
         {
+            _logger.LogInformation($"[{e.HttpMethod}] Path: {{{e.Path}}} Request body: {{{e.Body}}}");
             Logs += $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{e.HttpMethod}] Path: {{{e.Path}}} Request body: {{{e.Body}}}\n";
         }
 
