@@ -33,15 +33,16 @@ namespace WireMock.GUI.Window
             set => _viewModel.Body = value;
         }
 
-        public IDictionary<string, string> Headers 
-        {
-            get => _viewModel.Headers;
-            set => _viewModel.Headers = value;
-        }
+        public IDictionary<string, string> Headers => _viewModel.HeadersDictionary;
 
         #endregion
 
         #region Methods
+
+        public void AddHeader(string key, string value)
+        {
+            _viewModel.AddHeader(key, value);
+        }
 
         public new bool ShowDialog()
         {

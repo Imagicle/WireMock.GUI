@@ -12,7 +12,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="20" />
+            <RowDefinition Height="30" />
             <RowDefinition Height="20" />
             <RowDefinition Height="*" />
             <RowDefinition Height="40" />
@@ -24,7 +24,7 @@
 
 		<Grid Grid.Row="1" Margin="0 5 0 10">
 			<ScrollViewer>
-				<ListBox ItemsSource="{Binding HeadersForGui}" HorizontalContentAlignment="Stretch">
+				<ListBox ItemsSource="{Binding Headers}" HorizontalContentAlignment="Stretch">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<Grid Height="23">
@@ -52,11 +52,22 @@
 			</ScrollViewer>
 		</Grid>
 
-	    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-		    <Button Padding="10 0"
-		            Content="Add header" 
-		            Command="{Binding AddHeaderCommand}" />
-	    </StackPanel>
+        <Grid Grid.Row="2">
+	        <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0"
+                   VerticalAlignment="Center"
+                   Foreground="#F44336"
+                   Content="{Binding Path=InputErrorMessage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
+
+            <Button Grid.Column="1"
+                    Padding="10 0"
+                    Content="Add header" 
+                    Command="{Binding AddHeaderCommand}" />
+        </Grid>
 
 		<TextBlock Grid.Row="3"
 	               Padding="5 0 0 0"
@@ -71,7 +82,8 @@
             <Button Padding="10 0"
                     Margin="10 10 0 0"
                     Content="Ok"
-                    Click="OkButtonCommand" />
+                    Click="OkButtonCommand"
+                    IsEnabled="{Binding IsInputValid, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Window>

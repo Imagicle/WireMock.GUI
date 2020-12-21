@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using WireMock.GUI.Model;
@@ -52,6 +50,18 @@ namespace WireMock.GUI.Test.Model
 
         #endregion
 
+        #region HeadersDictionary
+
+        [Test]
+        public void WhenModelIsInstantiated_HeadersDictionary_ShouldReturnAnEmptyList()
+        {
+            _editResponseViewModel = new EditResponseViewModel();
+
+            _editResponseViewModel.HeadersDictionary.Should().BeEmpty();
+        }
+
+        #endregion
+
         #region Headers
 
         [Test]
@@ -62,32 +72,265 @@ namespace WireMock.GUI.Test.Model
             _editResponseViewModel.Headers.Should().BeEmpty();
         }
 
-        [Test]
-        public void Headers_ShouldBeEditableAndShouldAlsoAlignHeadersForGui()
-        {
-            var expectedHeaders = new ObservableCollection<HeaderViewModel>
-            {
-                new HeaderViewModel { Key = FakerWrapper.Faker.Lorem.Paragraph() },
-                new HeaderViewModel  { Key = FakerWrapper.Faker.Lorem.Paragraph() }
-            };
-            var headersDictionary = ToDictionary(expectedHeaders);
-            
-            _editResponseViewModel.Headers = headersDictionary;
+        #endregion
 
-            _editResponseViewModel.Headers.Should().BeEquivalentTo(headersDictionary);
-            _editResponseViewModel.HeadersForGui.Should().BeEquivalentTo(expectedHeaders);
+        #region IsInputValid
+
+        [Test]
+        public void IfHeadersIsEmpty_IsInputValid_ShouldReturnTrue()
+        {
+            var isInputValid = _editResponseViewModel.IsInputValid;
+
+            isInputValid.Should().BeTrue();
+        }
+
+        [Test]
+        public void IfAddedHeadersAreValid_IsInputValid_ShouldReturnTrue()
+        {
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), null);
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), string.Empty);
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), "  \t ");
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+
+            var isInputValid = _editResponseViewModel.IsInputValid;
+
+            isInputValid.Should().BeTrue();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.IsInputValid);
+        }
+
+        [Test]
+        public void IfHeaderBecomesValid_IsInputValid_ShouldReturnTrue()
+        {
+            _editResponseViewModel.AddHeader(null, null);
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.Headers[0].Key = FakerWrapper.Faker.Lorem.Paragraph();
+
+            var isInputValid = _editResponseViewModel.IsInputValid;
+
+            isInputValid.Should().BeTrue();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.IsInputValid);
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("  ")]
+        [TestCase(" \t ")]
+        public void IfAddedHeaderHasInvalidKey_IsInputValid_ShouldReturnFalse(string invalidHeaderKey)
+        {
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.AddHeader(invalidHeaderKey, FakerWrapper.Faker.Lorem.Paragraph());
+
+            var isInputValid = _editResponseViewModel.IsInputValid;
+
+            isInputValid.Should().BeFalse();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.IsInputValid);
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("  ")]
+        [TestCase(" \t ")]
+        public void IfHeaderBecomesInvalid_IsInputValid_ShouldReturnFalse(string invalidHeaderKey)
+        {
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), null);
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.Headers[0].Key = invalidHeaderKey;
+
+            var isInputValid = _editResponseViewModel.IsInputValid;
+
+            isInputValid.Should().BeFalse();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.IsInputValid);
+        }
+
+        [Test]
+        public void IfAddedHeaderKeyIsAlreadyUsedByAnotherHeader_IsInputValid_ShouldReturnFalse()
+        {
+            var duplicatedHeaderKey = FakerWrapper.Faker.Lorem.Word();
+            _editResponseViewModel.AddHeader(duplicatedHeaderKey, FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.AddHeader(duplicatedHeaderKey, FakerWrapper.Faker.Lorem.Paragraph());
+
+            var isInputValid = _editResponseViewModel.IsInputValid;
+
+            isInputValid.Should().BeFalse();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.IsInputValid);
+        }
+
+        [Test]
+        public void IfHeadersBecomeInvalidBecauseTheSameKeyIsUsedMultipleTimes_IsInputValid_ShouldReturnFalse()
+        {
+            var duplicatedHeaderKey = FakerWrapper.Faker.Lorem.Word();
+            _editResponseViewModel.AddHeader(duplicatedHeaderKey, FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.Headers[2].Key = duplicatedHeaderKey;
+
+            var isInputValid = _editResponseViewModel.IsInputValid;
+
+            isInputValid.Should().BeFalse();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.IsInputValid);
+        }
+
+        [Test]
+        public void IfInvalidHeaderIsRemoved_IsInputValid_ShouldReturnTrue()
+        {
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Word(), FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(null, FakerWrapper.Faker.Lorem.Paragraph());
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.Headers.RemoveAt(1);
+
+            var isInputValid = _editResponseViewModel.IsInputValid;
+
+            isInputValid.Should().BeTrue();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.IsInputValid);
+        }
+
+        [Test]
+        public void IfHeaderIsRemoved_IsInputValid_ShouldNotRaiseTheEventPropertyChange()
+        {
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Word(), FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Word(), FakerWrapper.Faker.Lorem.Paragraph());
+            var headerToBeRemoved = _editResponseViewModel.Headers[1];
+            _editResponseViewModel.Headers.Remove(headerToBeRemoved);
+            using var monitor = _editResponseViewModel.Monitor();
+            headerToBeRemoved.Key = FakerWrapper.Faker.Lorem.Word();
+
+            var unused = _editResponseViewModel.IsInputValid;
+
+            monitor.Should().NotRaisePropertyChangeFor(viewModel => viewModel.IsInputValid);
         }
 
         #endregion
 
-        #region HeadersForGui
+        #region InputErrorMessage
 
         [Test]
-        public void WhenModelIsInstantiated_HeadersForGui_ShouldReturnAnEmptyList()
+        public void InputErrorMessage_ShouldBeNullByDefault()
         {
-            _editResponseViewModel = new EditResponseViewModel();
+            var inputErrorMessage = _editResponseViewModel.InputErrorMessage;
 
-            _editResponseViewModel.HeadersForGui.Should().BeEmpty();
+            inputErrorMessage.Should().BeNull();
+        }
+
+        [Test]
+        public void IfAddedHeadersAreValid_InputErrorMessage_ShouldBeNull()
+        {
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), null);
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), string.Empty);
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), "  \t ");
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+
+            var inputErrorMessage = _editResponseViewModel.InputErrorMessage;
+
+            inputErrorMessage.Should().BeNull();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.InputErrorMessage);
+        }
+
+        [Test]
+        public void IfHeaderBecomesValid_InputErrorMessage_ShouldBeNull()
+        {
+            _editResponseViewModel.AddHeader(null, null);
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.Headers[0].Key = FakerWrapper.Faker.Lorem.Paragraph();
+
+            var inputErrorMessage = _editResponseViewModel.InputErrorMessage;
+
+            inputErrorMessage.Should().BeNull();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.InputErrorMessage);
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("  ")]
+        [TestCase(" \t ")]
+        public void IfAddedHeaderHasInvalidKey_InputErrorMessage_ShouldReturnSpecificErrorMessage(string invalidHeaderKey)
+        {
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.AddHeader(invalidHeaderKey, FakerWrapper.Faker.Lorem.Paragraph());
+
+            var inputErrorMessage = _editResponseViewModel.InputErrorMessage;
+            inputErrorMessage.Should().Be("Null or empty header keys are not allowed");
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.InputErrorMessage);
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("  ")]
+        [TestCase(" \t ")]
+        public void IfHeaderBecomesInvalid_InputErrorMessage_ShouldReturnSpecificErrorMessage(string invalidHeaderKey)
+        {
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), null);
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.Headers[0].Key = invalidHeaderKey;
+
+            var inputErrorMessage = _editResponseViewModel.InputErrorMessage;
+
+            inputErrorMessage.Should().Be("Null or empty header keys are not allowed");
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.InputErrorMessage);
+        }
+
+        [Test]
+        public void IfAddedHeaderKeyIsAlreadyUsedByAnotherHeader_InputErrorMessage_ShouldReturnSpecificErrorMessage()
+        {
+            var duplicatedHeaderKey = FakerWrapper.Faker.Lorem.Word();
+            _editResponseViewModel.AddHeader(duplicatedHeaderKey, FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.AddHeader(duplicatedHeaderKey, FakerWrapper.Faker.Lorem.Paragraph());
+
+            var inputErrorMessage = _editResponseViewModel.InputErrorMessage;
+
+            inputErrorMessage.Should().Be("The same key is specified multiple times");
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.InputErrorMessage);
+        }
+
+        [Test]
+        public void IfHeadersBecomeInvalidBecauseTheSameKeyIsUsedMultipleTimes_InputErrorMessage_ShouldReturnSpecificErrorMessage()
+        {
+            var duplicatedHeaderKey = FakerWrapper.Faker.Lorem.Word();
+            _editResponseViewModel.AddHeader(duplicatedHeaderKey, FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.Headers[2].Key = duplicatedHeaderKey;
+
+            var inputErrorMessage = _editResponseViewModel.InputErrorMessage;
+
+            inputErrorMessage.Should().Be("The same key is specified multiple times");
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.InputErrorMessage);
+        }
+
+        [Test]
+        public void IfInvalidHeaderIsRemoved_InputErrorMessage_ShouldBeNull()
+        {
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Word(), FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(null, FakerWrapper.Faker.Lorem.Paragraph());
+            using var monitor = _editResponseViewModel.Monitor();
+            _editResponseViewModel.Headers.RemoveAt(1);
+
+            var inputErrorMessage = _editResponseViewModel.InputErrorMessage;
+
+            inputErrorMessage.Should().BeNull();
+            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.InputErrorMessage);
+        }
+
+        [Test]
+        public void IfHeaderIsRemoved_InputErrorMessage_ShouldNotRaiseTheEventPropertyChange()
+        {
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Word(), FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Word(), FakerWrapper.Faker.Lorem.Paragraph());
+            var headerToBeRemoved = _editResponseViewModel.Headers[1];
+            _editResponseViewModel.Headers.Remove(headerToBeRemoved);
+            using var monitor = _editResponseViewModel.Monitor();
+            headerToBeRemoved.Key = FakerWrapper.Faker.Lorem.Word();
+
+            var unused = _editResponseViewModel.InputErrorMessage;
+
+            monitor.Should().NotRaisePropertyChangeFor(viewModel => viewModel.InputErrorMessage);
         }
 
         #endregion
@@ -97,9 +340,28 @@ namespace WireMock.GUI.Test.Model
         [Test]
         public void AddHeader_ShouldHadAHeader()
         {
+            var expectedKey = FakerWrapper.Faker.Lorem.Paragraph();
+            var expectedValue = FakerWrapper.Faker.Lorem.Paragraph();
+            _editResponseViewModel.AddHeader(expectedKey, expectedValue);
+
+            var header = _editResponseViewModel.Headers.Single();
+            header.Key.Should().Be(expectedKey);
+            header.Value.Should().Be(expectedValue);
+            var (key, value) = _editResponseViewModel.HeadersDictionary.Single();
+            key.Should().Be(expectedKey);
+            value.Should().Be(expectedValue);
+        }
+
+        #endregion
+
+        #region AddHeaderCommand
+
+        [Test]
+        public void AddHeaderCommand_ShouldHadAHeader()
+        {
             ExecuteAddHeaderCommand();
 
-            var header = _editResponseViewModel.HeadersForGui[0];
+            var header = _editResponseViewModel.Headers.Single();
             header.Key.Should().BeNull();
             header.Value.Should().BeNull();
         }
@@ -109,19 +371,35 @@ namespace WireMock.GUI.Test.Model
         #region DeleteHeader
 
         [Test]
-        public void WhenDeleteAnAddedHeader_ShouldRemoveOnlyThatHeader()
+        public void WhenDeletingAnAddedHeaderThatWasAddedWithTheRelativeCommand_ShouldRemoveOnlyThatHeader()
         {
             ExecuteAddHeaderCommand();
-            var headerNotToBeDeleted = _editResponseViewModel.HeadersForGui.Single();
+            var headerNotToBeDeleted = _editResponseViewModel.Headers.Single();
             ExecuteAddHeaderCommand();
-            var headerToBeDeleted = _editResponseViewModel.HeadersForGui.Single(h => h != headerNotToBeDeleted);
+            var headerToBeDeleted = _editResponseViewModel.Headers.Single(h => h != headerNotToBeDeleted);
             ExecuteAddHeaderCommand();
             ExecuteAddHeaderCommand();
 
             headerToBeDeleted.DeleteHeaderCommand.Execute(null);
 
-            _editResponseViewModel.HeadersForGui.Should().HaveCount(3);
-            _editResponseViewModel.HeadersForGui.Where(h => h == headerToBeDeleted).Should().BeEmpty();
+            _editResponseViewModel.Headers.Should().HaveCount(3);
+            _editResponseViewModel.Headers.Where(h => h == headerToBeDeleted).Should().BeEmpty();
+        }
+
+        [Test]
+        public void WhenDeletingAnAddedHeaderThatWasAddedWithTheRelativeMethod_ShouldRemoveOnlyThatHeader()
+        {
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+            var headerNotToBeDeleted = _editResponseViewModel.Headers.Single();
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+            var headerToBeDeleted = _editResponseViewModel.Headers.Single(h => h != headerNotToBeDeleted);
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+            _editResponseViewModel.AddHeader(FakerWrapper.Faker.Lorem.Paragraph(), FakerWrapper.Faker.Lorem.Paragraph());
+
+            headerToBeDeleted.DeleteHeaderCommand.Execute(null);
+
+            _editResponseViewModel.Headers.Should().HaveCount(3);
+            _editResponseViewModel.Headers.Where(h => h == headerToBeDeleted).Should().BeEmpty();
         }
 
         #endregion
@@ -131,11 +409,6 @@ namespace WireMock.GUI.Test.Model
         private void ExecuteAddHeaderCommand()
         {
             _editResponseViewModel.AddHeaderCommand.Execute(null);
-        }
-
-        private static IDictionary<string, string> ToDictionary(IEnumerable<HeaderViewModel> headers)
-        {
-            return headers.ToDictionary(header => header.Key, header => header.Value);
         }
 
         #endregion

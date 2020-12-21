@@ -256,9 +256,10 @@ namespace WireMock.GUI.Test.Model
 
             ExecuteEditResponseCommand();
 
-            A.CallToSet(() => editResponseWindow.Headers)
-                .WhenArgumentsMatch(args => args.Get<IDictionary<string, string>>(0) == expectedResponseHeaders)
-                .MustHaveHappenedOnceExactly();
+            foreach (var (key, value) in expectedResponseHeaders.Reverse())
+            {
+                A.CallTo(() => editResponseWindow.AddHeader(key, value)).MustHaveHappenedOnceExactly();
+            }
         }
 
         [Test]

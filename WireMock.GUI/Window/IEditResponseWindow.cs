@@ -6,6 +6,8 @@ namespace WireMock.GUI.Window
     {
         string Body { get; set; }
 
-        IDictionary<string, string> Headers { get; set; }
+        IDictionary<string, string> Headers { get; }
+
+        void AddHeader(string key, string value);
     }
 }

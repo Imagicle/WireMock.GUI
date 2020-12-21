@@ -113,7 +113,10 @@ namespace WireMock.GUI.Model
         {
             var textAreaWindow = _textAreaWindowFactory.Create();
             textAreaWindow.Body = ResponseBody;
-            textAreaWindow.Headers = ResponseHeaders;
+            foreach (var (key, value) in ResponseHeaders)
+            {
+                textAreaWindow.AddHeader(key, value);
+            }
 
             if (textAreaWindow.ShowDialog())
             {

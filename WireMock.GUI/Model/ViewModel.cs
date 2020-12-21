@@ -2,7 +2,6 @@
 
 namespace WireMock.GUI.Model
 {
-    // TODO: use IMALIB-64 when done
     public abstract class ViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
