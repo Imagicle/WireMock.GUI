@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:model="clr-namespace:WireMock.GUI.Model"
         mc:Ignorable="d"
-        Title="MockServer" Height="800" Width="880">
+        Title="WireMock.GUI" Height="800" Width="880">
     <Grid d:DataContext="{d:DesignInstance model:MainWindowViewModel}"
           Margin="10 0 10 10">
         <Grid.RowDefinitions>
