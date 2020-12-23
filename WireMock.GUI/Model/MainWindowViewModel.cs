@@ -6,7 +6,9 @@ using System.Net;
 using System.Windows.Input;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.Extensions.Logging;
+using NLog;
 using NLog.Extensions.Logging;
+using NLog.Targets;
 using WireMock.GUI.Mapping;
 using WireMock.GUI.Mock;
 using WireMock.GUI.Window;
@@ -24,7 +26,6 @@ namespace WireMock.GUI.Model
         private readonly IEditResponseWindowFactory _textAreaWindowFactory;
         private string _serverUrl;
         private bool _isServerStarted;
-        private string _logs;
 
         #endregion
 
@@ -48,7 +49,6 @@ namespace WireMock.GUI.Model
             InitMappings();
             _serverUrl = _mockServer.Url;
             _isServerStarted = true;
-            _logs = string.Empty;
         }
 
         #endregion
@@ -86,16 +86,6 @@ namespace WireMock.GUI.Model
         }
 
         public ObservableCollection<MappingInfoViewModel> Mappings { get; private set; }
-
-        public string Logs
-        {
-            get => _logs;
-            set
-            {
-                _logs = value;
-                OnPropertyChanged(nameof(Logs));
-            }
-        }
 
         #endregion
 
@@ -162,7 +152,6 @@ namespace WireMock.GUI.Model
         private void OnNewRequest(NewRequestEventArgs e)
         {
             _logger.LogInformation($"[{e.HttpMethod}] Path: {{{e.Path}}} Request body: {{{e.Body}}}");
-            Logs += $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{e.HttpMethod}] Path: {{{e.Path}}} Request body: {{{e.Body}}}\n";
         }
 
         private void OnServerStatusChange(ServerStatusChangeEventArgs e)

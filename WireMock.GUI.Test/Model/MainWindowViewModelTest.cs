@@ -189,35 +189,6 @@ namespace WireMock.GUI.Test.Model
 
         #endregion
 
-        #region Logs
-
-        [Test]
-        public void Logs_ShouldBeEmptyByDefault()
-        {
-            _mainWindowViewModel.Logs.Should().BeEmpty();
-        }
-
-        [Test]
-        public void WhenEventOnNewRequestAreRaised_Logs_ShouldBeUpdated()
-        {
-            _mockServer.OnNewRequest += Raise.FreeForm.With(ANewRequestEventArgs());
-            _mockServer.OnNewRequest += Raise.FreeForm.With(ANewRequestEventArgs());
-
-            _mainWindowViewModel.Logs.Split('\n').Should().HaveCount(3);
-        }
-
-        [Test]
-        public void WhenLogsIsModified_Logs_ShouldRaiseAnEvent()
-        {
-            using var monitor = _mainWindowViewModel.Monitor();
-
-            _mockServer.OnNewRequest += Raise.FreeForm.With(ANewRequestEventArgs());
-
-            monitor.Should().RaisePropertyChangeFor(viewModel => viewModel.Logs);
-        }
-
-        #endregion
-
         #region Stop
 
         [Test]
