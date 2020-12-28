@@ -37,6 +37,21 @@ namespace WireMock.GUI.Test.Model
 
         #endregion
 
+        #region Constructor
+
+        [Test]
+        public void Constructor_ShouldCallMockServerUpdateMappingsWithLoadedMappings()
+        {
+            var expectedMappings = MappingInfoViewModelTestUtils.SomeMappings();
+            A.CallTo(() => _mappingsProvider.LoadMappings()).Returns(ToPersistableMappings(expectedMappings));
+
+            _mainWindowViewModel = new MainWindowViewModel(_mockServer, _mappingsProvider);
+
+            A.CallTo(() => _mockServer.UpdateMappings(A<IEnumerable<MappingInfoViewModel>>.That.Matches(map => AreEqual(map, expectedMappings)))).MustHaveHappenedOnceExactly();
+        }
+
+        #endregion
+
         #region StartServerCommand
 
         [Test]
@@ -234,16 +249,6 @@ namespace WireMock.GUI.Test.Model
 
         #region Utility Methods
 
-        private static NewRequestEventArgs ANewRequestEventArgs()
-        {
-            return new NewRequestEventArgs
-            {
-                HttpMethod = Faker.PickRandom<HttpMethod>(),
-                Path = Faker.Lorem.Word(),
-                Body = Faker.Lorem.Sentence()
-            };
-        }
-
         private static ServerStatusChangeEventArgs AServerStatusChangeEventArgs(bool isStarted)
         {
             return new ServerStatusChangeEventArgs
@@ -312,6 +317,20 @@ namespace WireMock.GUI.Test.Model
             try
             {
                 persistableMappings1.Should().BeEquivalentTo(persistableMappings2);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool AreEqual(IEnumerable<MappingInfoViewModel> mappings1, IEnumerable<MappingInfoViewModel> mappings2)
+        {
+            try
+            {
+                mappings1.Should().BeEquivalentTo(mappings2);
             }
             catch
             {

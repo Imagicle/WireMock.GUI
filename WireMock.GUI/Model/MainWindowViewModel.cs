@@ -107,6 +107,7 @@ namespace WireMock.GUI.Model
             {
                 AddMapping(ToMappingInfoViewModel(mapping));
             }
+            _mockServer.UpdateMappings(Mappings);
         }
 
         private void ExecuteStartServerCommand()
