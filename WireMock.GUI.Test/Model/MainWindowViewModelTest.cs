@@ -165,6 +165,7 @@ namespace WireMock.GUI.Test.Model
             var expectedMappings = MappingInfoViewModelTestUtils.SomeMappings();
             A.CallTo(() => _mappingsProvider.LoadMappings()).Returns(ToPersistableMappings(expectedMappings));
             _mainWindowViewModel = new MainWindowViewModel(_mockServer, _mappingsProvider);
+            Fake.ClearRecordedCalls(_mockServer);
 
             ExecuteApplyCommand();
 
